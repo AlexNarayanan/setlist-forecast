@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "cross-env NODE_ENV=production node_modules/.bin/babel-node --presets react,es2015 src/server.js",
-    "build": "cross-env NODE_ENV=production node_modules/.bin/webpack -p",
+    "build": "node_modules/.bin/webpack -d",
     "build:dev": "node_modules/.bin/webpack -d",
     "build:dev:watch": "node_modules/.bin/webpack -d --watch"
   },
