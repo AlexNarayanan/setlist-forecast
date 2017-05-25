@@ -6,7 +6,6 @@ export default class IndexPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = { artist: '', response: '' };
-        console.info('inside constructor index page');
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -28,7 +27,8 @@ export default class IndexPage extends React.Component {
             if (xmlhttp.readyState === 4) {
                 const response = JSON.parse(xmlhttp.responseText);
                 if (xmlhttp.status === 200 && response.status === 'OK') {
-                    _this.setState({ artist: '', response: response.artist });
+                    console.log(response);
+                    _this.setState({ artist: '', response: response.id });
                 } else {
                     _this.setState({ artist: '', response: 'Sorry there has been an error' });
                 }
@@ -50,7 +50,7 @@ export default class IndexPage extends React.Component {
                     <input type="submit" value="Submit" />
                 </form>
                 <div>
-                    <p>You have searched for: { this.state.response }</p>
+                    <p>The id of your search is: { this.state.response }</p>
                 </div>
             </div>
         );

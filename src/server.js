@@ -6,10 +6,12 @@ import { renderToString } from 'react-dom/server';
 import { match, RouterContext } from 'react-router';
 import bodyParser from 'body-parser';
 import routes from './routes';
+import MusicbrainzService from './services/musicbrainz';
 import NotFoundPage from './components/NotFoundPage';
 
 // initialize the server and configure support for ejs templates
 const app = new Express();
+const musicbrainzService = new MusicbrainzService();
 const server = new Server(app);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -57,42 +59,17 @@ app.get('*', (req, res) => {
     );
 });
 
+// handler for form submission
 app.post('/submit', (req, res) => {
-
     const artist = req.body.artist;
     console.log(`The user searched for: ${artist}`);
-    return res.send({ status: 'OK', artist: artist });
-    /*match(
-        { routes, location: req.url },
-        (err, redirectLocation, renderProps) => {
-            // in case of error display the error message
-            if (err) {
-                return res.status(500).send(err.message);
-            }
-
-            // in case of redirect propagate the redirect to the browser
-            if (redirectLocation) {
-                return res.redirect(302, redirectLocation.pathname + redirectLocation.search);
-            }
-
-            // generate the React markup for the current route
-            let markup;
-            if (renderProps) {
-                // if the current route matched we have renderProps
-                markup = renderToString(<RouterContext {...renderProps } createElement={(Component, props) => {
-                    return <Component artist={artist} {...props} />;
-                }}/>);
-            } else {
-                // otherwise we can render a 404 page
-                markup = renderToString(<NotFoundPage/>);
-                res.status(404);
-            }
-
-            // render the index template with the embedded React markup
-            return res.render('index', { markup });
-
-        });*/
-
+    musicbrainzService.getMusicbrainzID(artist).then((id) => {
+        console.log('PROMISE RETURNED');
+        return res.send({ status: 'OK', id: id });
+    }).catch((err) => {
+        console.log('THERE WAS AN ERROR');
+        return res.send({ status: 'OK', id: 'Error' });
+    });
 });
 
 // start the server
