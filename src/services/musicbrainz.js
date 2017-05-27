@@ -1,5 +1,4 @@
 'use strict';
-import http from 'http';
 import Request from './request';
 
 const request = new Request();
@@ -11,7 +10,7 @@ export default class MusicbrainzService {
         this.pathRoot = '/ws/2/artist/?query='
     }
 
-    // Returns the unique musicbrainz identifier for a given artist
+    // Returns a promise that will return the unique identifier for a given artist
     getMusicbrainzID(artist) {
 
         // Set up request options
@@ -23,36 +22,17 @@ export default class MusicbrainzService {
                 path: `${this.pathRoot}artist:${artist}&limit=1&fmt=json`
             };
 
+        console.info(`[LOG] New search submitted for: ${artist}`);
         console.info(`[LOG] Making musicbrainz request at: ${options.host}${options.path}`);
-        return request.get(options);
-
-        // Return the request as a promise
-        /*const req = http.get(options, (stream) => {
-            let res = '';
-            console.log(`[LOG] Response status${stream.statusCode}]`);
-
-            if (stream.statusCode === 200) {
-
-                stream.on('data', function (chunk) {
-                    res += chunk;
-                });
-
-                stream.on('end', function () {
-                    res = JSON.parse(res);
-                    console.log(res.artists[0].id);
-                    return res.artists[0].id || 'Data not formatted as expected';
-                });
-            }
-
-            return 'Something went wrong, try again';
+        return new Promise((resolve, reject) => {
+            request.get(options).then((res) => {
+                const artistID = res.artists[0].id;
+                console.info(`[LOG] Retrieved id: ${artistID}`);
+                return resolve(artistID || 'Data not formatted as expected');
+            }).catch((err) => {
+                return reject(err);
+            });
         });
-
-        req.on('error', (e) => {
-            console.error(`problem with request: ${e.message}`);
-        });
-
-        req.end();*/
 
     }
-
 }

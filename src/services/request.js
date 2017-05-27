@@ -6,10 +6,9 @@ export default class Request {
     // Promise wrapper for the request method from the http library
     // Takes in options object inherited from the parent function
     get(options) {
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             const req = http.get(options, (stream) => {
-                let artistID,
-                    res = '';
+                let res = '';
                 console.info(`[LOG] Response status: [${stream.statusCode}]`);
 
                 if (stream.statusCode !== 200) {
@@ -21,17 +20,12 @@ export default class Request {
                 });
 
                 stream.on('end', function () {
-                    res = JSON.parse(res);
-                    artistID = res.artists[0].id;
-                    console.info(`[LOG] Retrieved id: ${artistID}`);
-                    return resolve(artistID || 'Data not formatted as expected');
+                    return resolve(JSON.parse(res));
                 });
-
-                return 'Something went wrong, try again';
             });
 
-            req.on('error', (e) => {
-                reject(`[ERROR] Problem with request: ${e.message}`);
+            req.on('error', (err) => {
+                reject(`Problem with request: ${err.message}`);
             });
 
             req.end();

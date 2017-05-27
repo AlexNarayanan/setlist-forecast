@@ -6,12 +6,14 @@ import { renderToString } from 'react-dom/server';
 import { match, RouterContext } from 'react-router';
 import bodyParser from 'body-parser';
 import routes from './routes';
+import Artist from './models/artist';
 import MusicbrainzService from './services/musicbrainz';
+import SetlistfmService from './services/setlistfm';
 import NotFoundPage from './components/NotFoundPage';
 
 // initialize the server and configure support for ejs templates
 const app = new Express();
-const musicbrainzService = new MusicbrainzService();
+const setlistfmService = new SetlistfmService();
 const server = new Server(app);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -61,15 +63,21 @@ app.get('*', (req, res) => {
 
 // handler for form submission
 app.post('/submit', (req, res) => {
-    const artist = req.body.artist;
-    console.log(`The user searched for: ${artist}`);
-    musicbrainzService.getMusicbrainzID(artist).then((id) => {
-        console.log('PROMISE RETURNED');
-        return res.send({ status: 'OK', id: id });
+    const artist = new Artist(),
+        artistName = encodeURI(req.body.artistName);
+
+    artist.populateData(artistName).then((mbid) => {
+        return res.send({ status: 'OK', id: mbid });
     }).catch((err) => {
-        console.log('THERE WAS AN ERROR');
+        console.info(`[ERROR] ${err}`);
         return res.send({ status: 'OK', id: 'Error' });
     });
+    /*setlistfmService.getMBID(artist).then((mbid) => {
+        return res.send({ status: 'OK', id: mbid });
+    }).catch((err) => {
+        console.info(`[ERROR] ${err}`);
+        return res.send({ status: 'OK', id: 'Error' });
+    });*/
 });
 
 // start the server

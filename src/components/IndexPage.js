@@ -5,7 +5,11 @@ export default class IndexPage extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { artist: '', response: '' };
+        this.state = {
+            artist: '',
+            isSending: false,
+            response: ''
+        };
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -13,33 +17,48 @@ export default class IndexPage extends React.Component {
 
     handleChange(event) {
         event.preventDefault();
-        this.setState({ artist: event.target.value, response: this.state.response });
+        this.setState({
+            artist: event.target.value
+        });
     }
 
     handleSubmit(event) {
         event.preventDefault();
-        console.info(this.state.artist);
+        this.setState({
+            isSending: true
+        });
 
-        // Make xmlhttprequest
+        // Make xmlhttprequest to server
         const xmlhttp = new XMLHttpRequest(),
             _this = this;
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState === 4) {
                 const response = JSON.parse(xmlhttp.responseText);
                 if (xmlhttp.status === 200 && response.status === 'OK') {
-                    console.log(response);
-                    _this.setState({ artist: '', response: response.id });
+                    _this.setState({
+                        isSending: false,
+                        response: response.id
+                    });
                 } else {
-                    _this.setState({ artist: '', response: 'Sorry there has been an error' });
+                    _this.setState({
+                        isSending: false,
+                        response: 'Sorry there has been an error'
+                    });
                 }
             }
         };
         xmlhttp.open('POST', 'submit', true);
         xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        xmlhttp.send(`artist=${ this.state.artist }`);
+        xmlhttp.send(`artistName=${ encodeURI(this.state.artist) }`);
     }
 
     render() {
+        let sending;
+        if (this.state.isSending) {
+            sending = <div>
+                <p>Sending...</p>
+            </div>
+        }
         return (
             <div>
                 <form onSubmit={ this.handleSubmit }>
@@ -49,6 +68,7 @@ export default class IndexPage extends React.Component {
                     </label>
                     <input type="submit" value="Submit" />
                 </form>
+                {sending}
                 <div>
                     <p>The id of your search is: { this.state.response }</p>
                 </div>
